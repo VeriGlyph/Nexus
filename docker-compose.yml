@@ -1,0 +1,11 @@
+services:
+  veriglyph-nexus:
+    container_name: veriglyph-nexus
+    image: veriglyph-nexus
+    build: .
+    restart: unless-stopped
+    volumes:
+      - ./:/app
+      - /app/node_modules
+    ports:
+      - "8300:8080"

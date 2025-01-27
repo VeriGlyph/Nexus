@@ -14,25 +14,29 @@ Your hub for creating, managing, and publishing CIP-88 Registration Certificates
 **NOTE: THIS SOFTWARE IS CURRENTLY IN AN EARLY POC (PROOF OF CONCEPT) ALPHA STAGE AND SHOULD NOT BE USED IN PRODUCTION.
 FOR TESTING AND ITERATING ON THE CARDANO PREPRODUCTION TESTNET ONLY AT THIS POINT.**
 
-## Project setup
-```
-npm install
-```
+## Prerequisites
 
-### Compiles and hot-reloads for development
-```
-npm run serve
-```
+- Linux (tested on Ubuntu)
+- [Git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git)
+- [Make](https://askubuntu.com/questions/161104/how-do-i-install-make)
+- Docker ([Part-1](https://docs.docker.com/engine/install/ubuntu/) & [Part-2](https://docs.docker.com/engine/install/linux-postinstall/))
 
-### Compiles and minifies for production
-```
-npm run build
-```
+## Installation
 
-### Lints and fixes files
-```
-npm run lint
-```
+1. Clone the repository: `git clone git@github.com:VeriGlyph/Nexus.git`
+2. Change directory: `cd Nexus`
+3. Build & run the container: `make up`
 
-### Customize configuration
+## Available Make Commands
+
+_To run the make commands, simple type `make command-name` (e.g. `make up`)_
+
+* `up` Starts the docker container
+* `down` Shuts down the docker container
+* `status` View the status of running container
+* `stats` View the resource usage of running container
+* `logs` View the logs out of running container
+* `shell` Drop into an interactive shell inside running container
+
+## Customize configuration
 See [Configuration Reference](https://cli.vuejs.org/config/).
