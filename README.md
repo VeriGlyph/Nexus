@@ -27,7 +27,8 @@ FOR TESTING AND ITERATING ON THE CARDANO PREPRODUCTION TESTNET ONLY AT THIS POIN
 
 1. Clone the repository: `git clone git@github.com:VeriGlyph/Nexus.git`
 2. Change directory: `cd Nexus`
-3. Build & run the container: `make up`
+3. Copy `.env.example` file and save it as `.env` and update the values
+4. Build & run the container: `make up`
 
 > The app will be running on http://localhost:8300
 
@@ -48,8 +49,9 @@ _To run the make commands, simple type `make command-name` (e.g. `make up`)_
 
 1. Clone the repository: `git clone git@github.com:VeriGlyph/Nexus.git`
 2. Change directory: `cd Nexus`
-3. Install npm packages: `npm install`
-4. Compiles and hot-reloads for development: `npm run serve`
+3. Copy `.env.example` file and save it as `.env` and update the values
+4. Install npm packages: `npm install`
+5. Compiles and hot-reloads for development: `npm run serve`
 
 > The app will be running on http://localhost:8080
 

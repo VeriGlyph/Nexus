@@ -25,4 +25,4 @@ logs:
 
 .PHONY: shell
 shell:
-	docker exec -it veriglyph-nexus bash
+	docker exec -it veriglyph-nexus sh
