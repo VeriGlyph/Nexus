@@ -20,10 +20,20 @@ const Koios = {
     maxTxSize: 16384,
     costPerWord: "4310",
   },
+  getApiBaseUrl() {
+    const network = process.env.VUE_APP_CARDANO_NETWORK;
+    return `https://${
+      network === "mainnet" ? "api" : network
+    }.koios.rest/api/v1`;
+  },
   async getTip() {
     let response;
     try {
-      response = await axios.get("https://api.koios.rest/api/v0/tip");
+      response = await axios.get(`${this.getApiBaseUrl()}/tip`, {
+        headers: {
+          authorization: `Bearer ${process.env.VUE_APP_KOIOS_API_KEY}`,
+        },
+      });
     } catch (e) {
       console.error("Could not query blockchain tip from Koios:", e);
       return false;
@@ -46,7 +56,12 @@ const Koios = {
     let response;
     try {
       response = await axios.get(
-        "https://api.koios.rest/api/v0/epoch_params?_epoch_no=" + epoch
+        `${this.getApiBaseUrl()}/epoch_params?_epoch_no=${epoch}`,
+        {
+          headers: {
+            authorization: `Bearer ${process.env.VUE_APP_KOIOS_API_KEY}`,
+          },
+        }
       );
     } catch (e) {
       console.log(
