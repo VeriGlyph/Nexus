@@ -14,25 +14,50 @@ Your hub for creating, managing, and publishing CIP-88 Registration Certificates
 **NOTE: THIS SOFTWARE IS CURRENTLY IN AN EARLY POC (PROOF OF CONCEPT) ALPHA STAGE AND SHOULD NOT BE USED IN PRODUCTION.
 FOR TESTING AND ITERATING ON THE CARDANO PREPRODUCTION TESTNET ONLY AT THIS POINT.**
 
-## Project setup
-```
-npm install
-```
+## Installation (Docker)
 
-### Compiles and hot-reloads for development
-```
-npm run serve
-```
+### Prerequisites
+
+- Linux (tested on Ubuntu)
+- [Git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git)
+- [Make](https://askubuntu.com/questions/161104/how-do-i-install-make)
+- Docker ([Part-1](https://docs.docker.com/engine/install/ubuntu/) & [Part-2](https://docs.docker.com/engine/install/linux-postinstall/))
+
+### Steps
+
+1. Clone the repository: `git clone git@github.com:VeriGlyph/Nexus.git`
+2. Change directory: `cd Nexus`
+3. Build & run the container: `make up`
+
+> The app will be running on http://localhost:8300
+
+### Available Make Commands
+
+_To run the make commands, simple type `make command-name` (e.g. `make up`)_
+
+* `up` Starts the docker container
+* `down` Shuts down the docker container
+* `status` View the status of running container
+* `stats` View the resource usage of running container
+* `logs` View the logs out of running container
+* `shell` Drop into an interactive shell inside running container
+
+## Installation (Standalone)
+
+### Steps
+
+1. Clone the repository: `git clone git@github.com:VeriGlyph/Nexus.git`
+2. Change directory: `cd Nexus`
+3. Install npm packages: `npm install`
+4. Compiles and hot-reloads for development: `npm run serve`
+
+> The app will be running on http://localhost:8080
 
 ### Compiles and minifies for production
-```
-npm run build
-```
+> npm run build
 
 ### Lints and fixes files
-```
-npm run lint
-```
+> npm run lint
 
-### Customize configuration
+## Customize configuration
 See [Configuration Reference](https://cli.vuejs.org/config/).
