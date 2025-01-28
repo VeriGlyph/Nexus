@@ -1,7 +1,9 @@
 <script>
 import { cloneDeep, tap, set } from "lodash";
+import ManageSocials from "@/components/ManageSocials.vue";
 
 export default {
+  components: { ManageSocials },
   props: {
     value: {
       type: Object,
@@ -81,31 +83,14 @@ export default {
         this.projectDetails[5] = value;
       },
     },
-    newSocialName: {
-      get() {
-        return this.newSocial.data[0];
-      },
-      set(value) {
-        this.newSocial.data[0] = value.toLowerCase();
-      },
-    },
-    newSocialUrl: {
-      get() {
-        return Array.isArray(this.newSocial.data[1])
-          ? this.newSocial.data[1].join("")
-          : this.newSocial.data[1];
-      },
-      set(value) {
-        this.newSocial.data[1] = this.breakURI(value, 64);
-      },
-    },
   },
+  data: () => ({
+    rules: {
+      name: [(v) => !!v || "Must provide a collection name!"],
+    },
+  }),
   emits: ["input"],
   methods: {
-    updateSocial(key, value) {
-      this[key] = value;
-      this.$forceUpdate();
-    },
     update(key, value) {
       if (key === 1) {
         value = this.wordwrap(value, 64);
@@ -115,22 +100,7 @@ export default {
       );
       this.$forceUpdate();
     },
-    createSocial() {
-      this.newSocial.data = [];
-      this.newSocial.valid = false;
-      this.newSocial.show = true;
-    },
   },
-  data: () => ({
-    newSocial: {
-      data: [],
-      show: false,
-      valid: false,
-    },
-    rules: {
-      name: [(v) => !!v || "Must provide a collection name!"],
-    },
-  }),
 };
 </script>
 
@@ -192,66 +162,7 @@ export default {
         <v-spacer></v-spacer>
       </v-row>
     </div>
-    <div class="mb-4">
-      <v-row justify="end">
-        <v-col cols="auto">
-          <label>Project Social Media</label>
-        </v-col>
-        <v-spacer></v-spacer>
-        <v-col cols="auto">
-          <v-btn color="accent" @click="createSocial">
-            <v-icon>mdi-plus</v-icon>
-            Add Social
-          </v-btn>
-        </v-col>
-      </v-row>
-      <v-simple-table v-if="socials.length">
-        <template v-slot:default>
-          <thead>
-            <tr>
-              <th>Platform</th>
-              <th>Link</th>
-              <th>&nbsp;</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="(social, index) in socials" :key="index">
-              <td>{{ social[0] }}</td>
-              <td>{{ social[1].join("") }}</td>
-              <td></td>
-            </tr>
-          </tbody>
-        </template>
-      </v-simple-table>
-    </div>
-    <v-divider></v-divider>
-    <v-dialog v-model="newSocial.show" persistent max-width="768">
-      <v-card>
-        <v-card-title>
-          Add Social Platform
-          <v-spacer></v-spacer>
-          <v-btn icon @click="newSocial.show = false">
-            <v-icon>mdi-close</v-icon>
-          </v-btn>
-        </v-card-title>
-        <v-divider></v-divider>
-        <v-card-text>
-          <v-form ref="newSocial" v-model="newSocial.valid">
-            <v-text-field
-              label="Social Platform Name"
-              v-model="newSocialName"
-              @input="updateSocial(newSocialName, $event)"
-            ></v-text-field>
-            <v-text-field
-              label="Social Platform URL"
-              v-model="newSocialUrl"
-              @input="updateSocial(newSocialUrl, $event)"
-            ></v-text-field>
-          </v-form>
-          <pre>{{ newSocial.data }}</pre>
-        </v-card-text>
-      </v-card>
-    </v-dialog>
+    <ManageSocials v-model="socials" @input="update(5, $event)" />
   </div>
 </template>
 
