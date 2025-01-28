@@ -1,7 +1,6 @@
 export default {
   // eslint-disable-next-line
-  
-  
+
   install: (app) => {
     const MAP_HEX = {
       0: 0,

@@ -103,19 +103,6 @@ export default {
             retries: userOptions.retries,
             pollingFrequency: userOptions.frequency,
             found: false,
-            SupportedWallets: [
-              "nami",
-              "eternl",
-              "flint",
-              "typhoncip30",
-              "gerowallet",
-              "yoroi",
-              "LodeWallet",
-              "nufi",
-              "vespr",
-              "begin",
-              "lace",
-            ],
             Wallets: [],
             Wallet: null,
             ActiveWallet: false,
@@ -221,28 +208,6 @@ export default {
               this.cardano.Wallets.push(wallet);
             }
           });
-
-          // this.cardano.SupportedWallets.forEach((name) => {
-          //   if (window.cardano[name] === undefined) {
-          //     return;
-          //   }
-          //
-          //   if (
-          //     window.cardano[name].experimental &&
-          //     window.cardano[name].experimental.vespr_compat === true
-          //   ) {
-          //     return;
-          //   }
-          //
-          //   if (window.cardano[name].name.includes("via VESPR")) {
-          //     return;
-          //   }
-          //
-          //   const wallet = window.cardano[name];
-          //   if (!this.cardano.Wallets.includes(wallet)) {
-          //     this.cardano.Wallets.push(wallet);
-          //   }
-          // });
         },
         /**
          * @param _utxo TransactionUnspentOutputs
@@ -259,20 +224,11 @@ export default {
 
           for (let i = 0; i < _utxo.len(); i++) {
             const utxo = _utxo.get(i);
-            // const txid = `${utxo.input().transaction_id().to_hex()}#${utxo.input().index().toString()}`;
             if (utxo.output().amount().multiasset() === undefined) {
               segregated.lovelaceOnly.push(utxo);
             } else {
               segregated.withTokens.push(utxo);
             }
-            // console.log(
-            //   utxo.input().transaction_id().to_hex(),
-            //   utxo.input().index().toString()
-            // );
-            // console.log(
-            //   utxo.output().amount().coin().to_str(),
-            //   utxo.output().amount().multiasset()
-            // );
           }
 
           // Sort the lovelace-only UTxO by amount
@@ -317,7 +273,6 @@ export default {
             this.cardano.ActiveWallet = wallet;
             this.cardano.Wallet = await wallet.enable();
             this.cardano.status = "connected";
-            // await this.getChangeAddress();
             this.cardano.stake_key = await this.getStakeKey();
             this.$emit("connected");
             wallet.loading = false;

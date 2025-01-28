@@ -578,9 +578,7 @@ import {
 
 export default {
   name: "App",
-  // inject: ["wordwrap"],
   components: { FungibleTokenFields, TokenRoyaltyFields, TokenProjectFields },
-
   data: () => ({
     modal: {
       showSaved: false,
@@ -640,7 +638,6 @@ export default {
     checking_policy_script: false,
     rules: {
       policy_id: [
-        // 381adc91cec96a342a91cc5783c8f3cedd8a0d0e0d714b6ef08d2861
         (v) =>
           /^[a-f0-9]{56}$/i.test(v) ||
           "Must provide a valid, 56-character Policy ID in hex format",
@@ -939,8 +936,6 @@ export default {
         TransactionMetadatum.from_hex(final_payload)
       );
 
-      // txBuilder.set_fee(BigNum.from_str("1"));
-
       const use_inputs = this.findInputs(this.utxo, {
         lovelace: 2000000,
         assets: null,
@@ -948,7 +943,7 @@ export default {
 
       if (use_inputs.length) {
         use_inputs.forEach((input) => {
-          txBuilder.add_input(
+          txBuilder.add_regular_input(
             input.output().address(),
             input.input(),
             input.output().amount()
@@ -957,7 +952,6 @@ export default {
       }
 
       const changeAddress = await this.getChangeAddress();
-      // txBuilder.set_fee(txBuilder.min_fee());
       try {
         txBuilder.add_change_if_needed(changeAddress);
         const txBuilt = await txBuilder.build();
@@ -975,7 +969,7 @@ export default {
         }
         witnessSet.set_vkeys(totalVkeys);
 
-        const signed = await Transaction.new(
+        const signed = Transaction.new(
           tx.body(),
           witnessSet,
           tx.auxiliary_data()
