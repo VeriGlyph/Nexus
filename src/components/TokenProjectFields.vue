@@ -116,6 +116,11 @@ export default {
       @input="update(0, $event)"
       :rules="rules.name"
     ></v-text-field>
+    <v-text-field
+      v-model="artistName"
+      label="Artist Name"
+      @input="update(6, $event)"
+    />
     <v-textarea
       v-model="projectDescription"
       label="Collection Description"
