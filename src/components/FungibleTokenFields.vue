@@ -240,6 +240,7 @@ export default {
                 v-if="token[6]"
                 width="48"
                 class="ma-2"
+                alt="Token thumbnail"
               />
             </td>
             <td class="text-right">

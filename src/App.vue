@@ -912,9 +912,6 @@ export default {
       const encoded_witnesses = witnesses.map((witness) => {
         return witness.map((s) => Buffer.from(s, "hex"));
       });
-      // witnesses.forEach((witness) => {
-      //   witness.map((s) => Buffer.from(s, "hex"));
-      // });
       payloadMap.set(2, encoded_witnesses);
 
       const cbor_encoded_payload = encode(payloadMap);
