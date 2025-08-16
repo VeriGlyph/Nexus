@@ -702,7 +702,7 @@ export default {
       try {
         this.network = await this.getWalletNetwork();
         if (this.network === 0) {
-          // Is Testnet
+          // TODO: Need to configure this to be dynamic based on whatever is specified in environment variables
         } else {
           this.doError(
             `This app is currently only supported for testing on Preproduction Testnet. Please connect a wallet on that network!`
@@ -808,7 +808,7 @@ export default {
           return;
         }
         if (sig[0] === pub_key) {
-          sig = new_sig_value;
+          // sig = new_sig_value;
           existing_signature_found = true;
         }
       });
@@ -898,14 +898,11 @@ export default {
       this.modal.showPolicy = false;
     },
     validSignature: function () {
-      if (
+      return !(
         this.registration.policy.id === null ||
         this.registration.policy.content === null ||
         this.signature.witnesses.length === 0
-      ) {
-        return false;
-      }
-      return true;
+      );
     },
     compilePayload: async function () {
       const payloadMap = new Map();
