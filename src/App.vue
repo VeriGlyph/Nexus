@@ -185,28 +185,28 @@
           <template v-if="registration.data[2].includes(25)">
             <TokenProjectFields
               :cip="25"
-              :value="registration.data[6][25][1]"
-              v-on:input="doUpdate"
+              v-model="registration.data[6][25][1]"
+              @input="doUpdate"
             ></TokenProjectFields>
           </template>
           <template v-if="registration.data[2].includes(68)">
             <TokenProjectFields
               :cip="68"
               v-model="registration.data[6][68][1]"
-              v-on:input="doUpdate"
+              @input="doUpdate"
             ></TokenProjectFields>
           </template>
           <template v-if="registration.data[2].includes(27)">
             <TokenRoyaltyFields
               v-model="registration.data[6][27][1]"
-              v-on:input="doUpdate"
+              @input="doUpdate"
             ></TokenRoyaltyFields>
           </template>
           <template v-if="registration.data[2].includes(26)">
             <FungibleTokenFields
               v-model="registration.data[6][26][1]"
               :policy_id="registration.data[1][1]"
-              v-on:input="doUpdate"
+              @input="doUpdate"
             ></FungibleTokenFields>
           </template>
           <v-row class="my-4">
@@ -912,9 +912,6 @@ export default {
       const encoded_witnesses = witnesses.map((witness) => {
         return witness.map((s) => Buffer.from(s, "hex"));
       });
-      // witnesses.forEach((witness) => {
-      //   witness.map((s) => Buffer.from(s, "hex"));
-      // });
       payloadMap.set(2, encoded_witnesses);
 
       const cbor_encoded_payload = encode(payloadMap);

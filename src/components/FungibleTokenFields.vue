@@ -1,5 +1,6 @@
 <script>
-import { cloneDeep, tap, set } from "lodash";
+import { cloneDeep } from "lodash";
+
 export default {
   props: {
     value: {
@@ -16,7 +17,7 @@ export default {
       get() {
         return this.value;
       },
-      set(fungibleTokens) {
+      async set(fungibleTokens) {
         this.$emit("input", fungibleTokens);
       },
     },
@@ -50,6 +51,14 @@ export default {
         this.modal.token[6] = this.breakURI(tokenWebsite);
       },
     },
+    beaconToken: {
+      get() {
+        return Array.isArray(this.modal.token[7]) ? this.modal.token[7] : [];
+      },
+      set(beaconValue) {
+        this.modal.token[7] = beaconValue;
+      },
+    },
   },
   emits: ["input"],
   methods: {
@@ -74,10 +83,16 @@ export default {
       }
       this.resetModal();
     },
-    change() {
-      if (this.modal.$original == null) {
+    async change() {
+      for (const [key, value] of Object.entries(this.modal.token)) {
+        if (value === null || value === undefined || value === "") {
+          delete this.modal.token[key];
+        }
+      }
+      if (this.modal.$original === null) {
         this.fungibleTokens.push(cloneDeep(this.modal.token));
       }
+      await this.update();
       this.resetModal();
     },
     resetModal() {
@@ -96,7 +111,6 @@ export default {
       return 1234567 * exp;
     },
     tokenFieldUpdate(key, value) {
-      console.log("What changed?", key, value);
       switch (key) {
         case 2:
           value = this.wordwrap(value, 64);
@@ -112,32 +126,31 @@ export default {
       this.modal.token[key] = value;
       this.$forceUpdate();
     },
-    update(key, value) {
-      this.$emit(
-        "input",
-        tap(cloneDeep(this.fungibleTokens), (v) => set(v, key, value))
-      );
-      this.$forceUpdate();
-    },
     getTokenSrc(URI) {
       URI = Array.isArray(URI) ? URI.join("") : URI;
       const parts = URI.match(
-        /^(([^:/?#]+):\/\/)([^/?#]*)([^?#]*)?(\?[^#]*)?(#.*)?$/
+        /^(([^:/?#]+):)(\/\/)?([^/?#]*)([^?#]*)?(\?[^#]*)?(#.*)?$/
       );
 
       let url;
 
       switch (parts[2]) {
         case "ipfs":
-          url = `https://cloudflare-ipfs.com/ipfs/${parts[3]}`;
+          url = `https://ipfs.io/ipfs/${parts[4]}`;
           break;
         case "https":
         case "http":
+        case "data":
           url = parts[0];
           break;
       }
 
       return url;
+    },
+    async update() {
+      this.fungibleTokens = cloneDeep(this.fungibleTokens);
+      await this.$nextTick();
+      this.$forceUpdate();
     },
   },
   data: () => ({
@@ -148,12 +161,15 @@ export default {
       validToken: true,
     },
     rules: {
-      asset_id: [
-        // 381adc91cec96a342a91cc5783c8f3cedd8a0d0e0d714b6ef08d2861
-        (v) =>
-          /^[a-f0-9]{0,64}$/i.test(v) ||
-          "Must provide a valid Asset ID in hexadecimal format.",
-      ],
+      required: (v) => !!v || "This field is required!",
+      policy_id: (v) =>
+        !v ||
+        /^[a-f0-9]{56}$/i.test(v) ||
+        "Must provide a valid Policy ID in hex format.",
+      asset_id: (v) =>
+        !v ||
+        /^[a-f0-9]{0,64}$/i.test(v) ||
+        "Must provide a valid Asset ID in hexadecimal format.",
       asset_name: [(v) => !!v || "Must provide the asset display name."],
       description: [(v) => !!v || "Must provide a description"],
       rate: [
@@ -169,21 +185,20 @@ export default {
           "Please provide a valid address in Bech32 format! (addr1_abc1234...)",
       ],
       token_website: [
-        (v) =>
-          (v.length &&
-            /^([^:/?#]+:\/\/)([^/?#]*)([^?#]*)?(\?[^#]*)?(#.*)?$/.test(v)) ||
-          "Must provide a valid URI!",
+        (v) => !!v || true,
+        (v) => {
+          console.log("Checking website...", v);
+          if (v === undefined || v.length <= 0) {
+            return true;
+          }
+          return (
+            /^([^:/?#]+:)(\/\/)?([^/?#]*)([^?#]*)?(\?[^#]*)?(#.*)?$/.test(v) ||
+            "Must provide a valid URI!"
+          );
+        },
       ],
     },
   }),
-  // 0	Subject	Token Identifier	Yes
-  // 1	Token Name	String	Yes
-  // 2	Description	Array	Yes
-  // 3	Token Ticker	String	No
-  // 4	Token Decimals	Unsigned Integer	No
-  // 5	Token Website	URI Array	No
-  // 6	Token Image	URI Array	No
-  // 7	Beacon Token	Token Identifier	No
 };
 </script>
 
@@ -220,12 +235,13 @@ export default {
             <td>{{ token[3] }}</td>
             <td>{{ token[4] }}</td>
             <td>
-              <v-img
+              <img
                 :src="getTokenSrc(token[6])"
-                contain
+                v-if="token[6]"
                 width="48"
                 class="ma-2"
-              ></v-img>
+                alt="Token thumbnail"
+              />
             </td>
             <td class="text-right">
               <v-btn @click="edit(token)" icon>
@@ -236,7 +252,7 @@ export default {
                 icon
                 color="error"
               >
-                <v-icon>mdi-trash-can</v-icon>
+                <v-icon>mdi-delete</v-icon>
               </v-btn>
             </td>
           </tr>
@@ -263,7 +279,7 @@ export default {
               v-model="modal.token[0][1]"
               label="Asset ID (Hex)"
               required
-              :rules="rules.asset_id"
+              :rules="[rules.required, rules.asset_id]"
             ></v-text-field>
             <v-text-field
               v-model="modal.token[1]"
@@ -318,16 +334,24 @@ export default {
               label="Token Image"
               :rules="rules.token_website"
             ></v-text-field>
+            <div>
+              <label>Beacon Token</label>
+              <v-text-field
+                v-model="beaconToken[0]"
+                label="Beacon Token Policy ID"
+                :rules="[rules.policy_id]"
+              />
+              <v-text-field
+                v-model="beaconToken[1]"
+                label="Beacon Token Asset ID (Hex)"
+                :rules="[rules.asset_id]"
+              />
+            </div>
           </v-card-text>
           <v-card-actions>
-            <v-btn
-              @click="change"
-              color="primary"
-              :disabled="!modal.validToken"
-              >{{
-                modal.$original !== null ? "Save Changes" : "Add Token"
-              }}</v-btn
-            >
+            <v-btn @click="change" color="primary" :disabled="!modal.validToken"
+              >{{ modal.$original !== null ? "Save Changes" : "Add Token" }}
+            </v-btn>
             <v-btn @click="cancel" color="error">CANCEL</v-btn>
           </v-card-actions>
         </v-form>
