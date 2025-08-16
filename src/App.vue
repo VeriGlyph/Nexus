@@ -79,12 +79,6 @@
             </v-list-item-icon>
             <v-list-item-content>Checking balance...</v-list-item-content>
           </v-list-item>
-          <v-list-item v-else @click="getBalance">
-            <v-list-item-icon>
-              <v-icon>mdi-refresh</v-icon>
-            </v-list-item-icon>
-            <v-list-item-content>Refresh Balance</v-list-item-content>
-          </v-list-item>
           <v-list-item @click="disconnect">
             <v-list-item-icon>
               <v-icon>mdi-logout</v-icon>
@@ -208,6 +202,12 @@
               :policy_id="registration.data[1][1]"
               @input="doUpdate"
             ></FungibleTokenFields>
+          </template>
+          <template v-if="registration.data[2].includes(86)">
+            <TokenUpdateFields
+              v-model="registration.data[6][86][1]"
+              @input="doUpdate"
+            ></TokenUpdateFields>
           </template>
           <v-row class="my-4">
             <v-btn
@@ -479,8 +479,8 @@
             color="primary"
             @click="addSignature"
             :disabled="!newSignature.is_valid"
-            >Add</v-btn
-          >
+            >Add
+          </v-btn>
           <v-btn color="error" @click="modal.addSignature = false">
             Cancel
           </v-btn>
@@ -491,8 +491,8 @@
       <v-card>
         <v-card-text>
           <p class="text-center font-weight-bold text-h3 mb-0">
-            <v-icon color="error" size="96">mdi-alert-circle-outline</v-icon
-            ><br />
+            <v-icon color="error" size="96">mdi-alert-circle-outline</v-icon>
+            <br />
             ERROR
           </p>
         </v-card-text>
@@ -575,10 +575,16 @@ import {
   TransactionWitnessSet,
   Vkeywitnesses,
 } from "@emurgo/cardano-serialization-lib-asmjs";
+import TokenUpdateFields from "@/components/TokenUpdateFields.vue";
 
 export default {
   name: "App",
-  components: { FungibleTokenFields, TokenRoyaltyFields, TokenProjectFields },
+  components: {
+    TokenUpdateFields,
+    FungibleTokenFields,
+    TokenRoyaltyFields,
+    TokenProjectFields,
+  },
   data: () => ({
     modal: {
       showSaved: false,
@@ -594,7 +600,7 @@ export default {
     registration_scopes: {
       0: "Policy ID",
     },
-    feature_sets: [25, 26, 27, 48, 60, 68, 86],
+    feature_sets: [25, 26, 27, 68, 86],
     validation_methods: {
       0: "Key Signature",
     },
