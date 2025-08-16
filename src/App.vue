@@ -38,7 +38,7 @@
           </v-list-item-icon>
           <v-list-item-content>Export Registrations</v-list-item-content>
         </v-list-item>
-        <v-list-item>
+        <v-list-item @click="openImportDialog">
           <v-list-item-icon>
             <v-icon>mdi-import</v-icon>
           </v-list-item-icon>
@@ -67,17 +67,6 @@
             <v-list-item-content class="text-capitalize">
               {{ cardano.ActiveWallet.name.replace(" Wallet", "") }} Connected
             </v-list-item-content>
-          </v-list-item>
-          <v-list-item v-if="getting_balance">
-            <v-list-item-icon>
-              <v-progress-circular
-                width="4"
-                size="24"
-                color="secondary"
-                indeterminate
-              ></v-progress-circular>
-            </v-list-item-icon>
-            <v-list-item-content>Checking balance...</v-list-item-content>
           </v-list-item>
           <v-list-item @click="disconnect">
             <v-list-item-icon>
@@ -543,6 +532,12 @@
         </v-card-text>
       </v-card>
     </v-dialog>
+    <import-registrations-modal
+      ref="registrationDialog"
+      local-storage-key="VeriGlyphNexusRegistrations"
+      :max-size-m-b="10"
+      @loaded="onJsonLoaded"
+    />
   </v-app>
 </template>
 
@@ -576,10 +571,12 @@ import {
   Vkeywitnesses,
 } from "@emurgo/cardano-serialization-lib-asmjs";
 import TokenUpdateFields from "@/components/TokenUpdateFields.vue";
+import ImportRegistrationsModal from "@/components/ImportRegistrationsModal.vue";
 
 export default {
   name: "App",
   components: {
+    ImportRegistrationsModal,
     TokenUpdateFields,
     FungibleTokenFields,
     TokenRoyaltyFields,
@@ -1131,6 +1128,12 @@ export default {
         JSON.stringify(this.saved_registrations)
       );
       this.loadSaved();
+    },
+    openImportDialog() {
+      this.$refs.registrationDialog.open();
+    },
+    onJsonLoaded({ data }) {
+      this.saved_registrations = data;
     },
   },
   created() {
