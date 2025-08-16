@@ -632,6 +632,7 @@ export default {
       encoded_data: null,
       mapped_data: null,
     },
+    targetNetwork: process.env.VUE_APP_CARDANO_NETWORK || "preprod",
     network: null,
     utxo: null,
     getting_balance: false,
@@ -701,9 +702,13 @@ export default {
 
       try {
         this.network = await this.getWalletNetwork();
-        if (this.network === 0) {
-          // TODO: Need to configure this to be dynamic based on whatever is specified in environment variables
+        let targetNetwork = 0;
+        if (this.targetNetwork === "mainnet") {
+          targetNetwork = 1;
         } else {
+          targetNetwork = 0;
+        }
+        if (this.network !== targetNetwork) {
           this.doError(
             `This app is currently only supported for testing on Preproduction Testnet. Please connect a wallet on that network!`
           );
