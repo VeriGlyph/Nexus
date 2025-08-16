@@ -1,5 +1,6 @@
 <script>
-import { cloneDeep, tap, set } from "lodash";
+import { cloneDeep, set, tap } from "lodash";
+
 export default {
   props: {
     value: {
@@ -38,11 +39,11 @@ export default {
   emits: ["input"],
   methods: {
     royaltyPercentage() {
-      return parseFloat(this.royaltyDetails[0] || 0) * 100;
+      return parseFloat(this.royaltyDetails[1] || 0) * 100;
     },
     update(key, value) {
       if (key === 1) {
-        value = parseFloat(value);
+        value = value.replace(/[^0-9.]/g, "");
       }
       if (key === 2) {
         value = this.hardwrap(value, 64);
@@ -56,9 +57,12 @@ export default {
     rules: {
       rate: [
         (v) => !!v || "Must provide a royalty rate!",
-        (v) => parseInt(v) >= 0 || "Royalty rate must be positive",
         (v) =>
-          parseInt(v) <= 1 || "Royalty rate must be less than or equal to 1",
+          parseFloat(v) >= 0 ||
+          `Royalty rate must be positive ${parseFloat(v)}`,
+        (v) =>
+          parseFloat(v) <= 1 ||
+          `Royalty rate must be less than or equal to 1 ${parseFloat(v)}`,
       ],
       address: [
         (v) => !!v || "Must provide a recipient address!",
@@ -78,14 +82,14 @@ export default {
       <code>Version: 1</code>
     </p>
     <v-text-field
-      v-model="royaltyDetails[0]"
+      v-model="royaltyDetails[1]"
       label="Royalty Rate"
       hint="Must be a number between 0.000000 and 1.000000. 0.05 = 5% royalty"
       :rules="rules.rate"
       required
-      @input="update(0, $event)"
+      @input="update(1, $event)"
     >
-      <template v-slot:append> {{ royaltyPercentage().toFixed(4) }}% </template>
+      <template v-slot:append> {{ royaltyPercentage().toFixed(4) }}%</template>
     </v-text-field>
     <v-text-field
       v-model="royaltyAddress"
@@ -93,7 +97,7 @@ export default {
       label="Royalty Address"
       required
       :rules="rules.address"
-      @input="update(1, $event)"
+      @input="update(2, $event)"
     >
     </v-text-field>
   </div>
