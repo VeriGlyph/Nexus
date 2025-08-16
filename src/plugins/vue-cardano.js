@@ -1,5 +1,29 @@
 import { Buffer } from "buffer";
-import * as CSL from "@emurgo/cardano-serialization-lib-asmjs";
+import {
+  Address,
+  AssetName,
+  AuxiliaryDataHash,
+  BigNum,
+  CoinSelectionStrategyCIP2,
+  DataCost,
+  ExUnitPrices,
+  Int,
+  LinearFee,
+  MultiAsset,
+  NativeScript,
+  NativeScripts,
+  ScriptHash,
+  Transaction,
+  TransactionBuilder,
+  TransactionBuilderConfigBuilder,
+  TransactionOutputBuilder,
+  TransactionUnspentOutput,
+  TransactionUnspentOutputs,
+  TransactionWitnessSet,
+  UnitInterval,
+  Value,
+  Vkeywitnesses,
+} from "@emurgo/cardano-serialization-lib-asmjs";
 import axios from "axios";
 
 const defaultOptions = {
@@ -309,7 +333,7 @@ export default {
             if (!addressHex) {
               return false;
             }
-            return CSL.Address.from_bytes(addressHex);
+            return Address.from_bytes(addressHex);
           } catch (e) {
             console.log("Change Address Error:", e);
             return false;
@@ -317,17 +341,15 @@ export default {
         },
         async checkBalance(asset) {
           try {
-            const balance = CSL.Value.from_hex(
+            const balance = Value.from_hex(
               await this.cardano.Wallet.getBalance()
             );
 
             if (asset) {
-              const policy = CSL.ScriptHash.from_bytes(
+              const policy = ScriptHash.from_bytes(
                 this.fromHex(asset.policy_id)
               );
-              const asset_name = CSL.AssetName.new(
-                this.fromHex(asset.asset_id)
-              );
+              const asset_name = AssetName.new(this.fromHex(asset.asset_id));
               if (balance.multiasset() === undefined) {
                 return 0;
               } else {
@@ -347,7 +369,7 @@ export default {
           try {
             const assets_held = [];
 
-            const balance = CSL.Value.from_hex(
+            const balance = Value.from_hex(
               await this.cardano.Wallet.getBalance()
             );
 
@@ -355,9 +377,7 @@ export default {
               return [];
             }
 
-            const ScriptHash = CSL.ScriptHash.from_bytes(
-              this.fromHex(policy_id)
-            );
+            const ScriptHash = ScriptHash.from_bytes(this.fromHex(policy_id));
 
             const assets = balance.multiasset().get(ScriptHash);
 
@@ -389,7 +409,7 @@ export default {
         },
         async getStakeKey() {
           const stakeAddressCbor = await this.getStakeCbor();
-          const stakeAddress = CSL.Address.from_bytes(
+          const stakeAddress = Address.from_bytes(
             this.toUint8Array(stakeAddressCbor)
           );
           return stakeAddress.to_bech32();
@@ -406,66 +426,54 @@ export default {
           return this.cardano.protocol_parameters;
         },
         async getUTxO(pagination) {
-          const UTxO = CSL.TransactionUnspentOutputs.new();
+          const UTxO = TransactionUnspentOutputs.new();
           const walletUTxO = await this.cardano.Wallet.getUtxos(
             undefined,
             pagination
           );
           walletUTxO.map((utxo) => {
-            UTxO.add(
-              CSL.TransactionUnspentOutput.from_bytes(this.fromHex(utxo))
-            );
+            UTxO.add(TransactionUnspentOutput.from_bytes(this.fromHex(utxo)));
           });
           return UTxO;
         },
         async prepareTransaction() {
           const protocolParameters = await this.getParameters();
-          const txBuilderConfig = CSL.TransactionBuilderConfigBuilder.new()
+          const txBuilderConfig = TransactionBuilderConfigBuilder.new()
             .fee_algo(
-              CSL.LinearFee.new(
-                CSL.BigNum.from_str(
+              LinearFee.new(
+                BigNum.from_str(
                   protocolParameters.linearFee.minFeeA.toString()
                 ),
-                CSL.BigNum.from_str(
-                  protocolParameters.linearFee.minFeeB.toString()
-                )
+                BigNum.from_str(protocolParameters.linearFee.minFeeB.toString())
               )
             )
             .coins_per_utxo_byte(
-              CSL.BigNum.from_str(protocolParameters.costPerWord.toString())
+              BigNum.from_str(protocolParameters.costPerWord.toString())
             )
             .pool_deposit(
-              CSL.BigNum.from_str(protocolParameters.poolDeposit.toString())
+              BigNum.from_str(protocolParameters.poolDeposit.toString())
             )
             .key_deposit(
-              CSL.BigNum.from_str(protocolParameters.keyDeposit.toString())
+              BigNum.from_str(protocolParameters.keyDeposit.toString())
             )
             .max_value_size(protocolParameters.maxValSize)
             .max_tx_size(protocolParameters.maxTxSize)
             .ex_unit_prices(
-              CSL.ExUnitPrices.new(
-                CSL.UnitInterval.new(
-                  CSL.BigNum.from_str("1"),
-                  CSL.BigNum.from_str("1")
-                ),
-                CSL.UnitInterval.new(
-                  CSL.BigNum.from_str("1"),
-                  CSL.BigNum.from_str("1")
-                )
+              ExUnitPrices.new(
+                UnitInterval.new(BigNum.from_str("1"), BigNum.from_str("1")),
+                UnitInterval.new(BigNum.from_str("1"), BigNum.from_str("1"))
               )
             )
             .build();
 
-          return CSL.TransactionBuilder.new(txBuilderConfig);
+          return TransactionBuilder.new(txBuilderConfig);
         },
         async makeTransaction(recipients, metadata, ttl, dataHash) {
           const changeAddress = await this.getChangeAddress();
 
-          const inputs = CSL.TransactionUnspentOutputs.new();
+          const inputs = TransactionUnspentOutputs.new();
           (await this.cardano.Wallet.getUtxos()).map((utxo) =>
-            inputs.add(
-              CSL.TransactionUnspentOutput.from_bytes(this.fromHex(utxo))
-            )
+            inputs.add(TransactionUnspentOutput.from_bytes(this.fromHex(utxo)))
           );
 
           const txBuilder = await this.prepareTransaction();
@@ -479,7 +487,7 @@ export default {
             console.log(recipient);
 
             const lovelace = recipient.lovelace;
-            const ReceiveAddress = CSL.Address.from_bech32(recipient.address);
+            const ReceiveAddress = Address.from_bech32(recipient.address);
 
             let output;
 
@@ -500,43 +508,39 @@ export default {
             }
 
             if (recipient.assets !== undefined && recipient.assets.length > 0) {
-              const multiasset = CSL.MultiAsset.new();
+              const multiasset = MultiAsset.new();
               recipient.assets.forEach((entry) => {
-                const scriptHash = CSL.ScriptHash.from_hex(entry.policy);
-                const assetName = CSL.AssetName.new(
-                  this.fromAscii(entry.asset)
-                );
-                const quantity = CSL.BigNum.from_str(entry.quantity.toString());
+                const scriptHash = ScriptHash.from_hex(entry.policy);
+                const assetName = AssetName.new(this.fromAscii(entry.asset));
+                const quantity = BigNum.from_str(entry.quantity.toString());
                 multiasset.set_asset(scriptHash, assetName, quantity);
               });
               if (lovelace > 0) {
-                output = CSL.TransactionOutputBuilder.new()
+                output = TransactionOutputBuilder.new()
                   .with_address(ReceiveAddress)
                   .next()
                   .with_coin_and_asset(
-                    CSL.BigNum.from_str(lovelace.toString()),
+                    BigNum.from_str(lovelace.toString()),
                     multiasset
                   )
                   .build();
               } else {
-                output = CSL.TransactionOutputBuilder.new()
+                output = TransactionOutputBuilder.new()
                   .with_address(ReceiveAddress)
                   .next()
                   .with_asset_and_min_required_coin_by_utxo_cost(
                     multiasset,
-                    CSL.DataCost.new_coins_per_byte(
-                      CSL.BigNum.from_str(
-                        protocolParameters.costPerWord.toString()
-                      )
+                    DataCost.new_coins_per_byte(
+                      BigNum.from_str(protocolParameters.costPerWord.toString())
                     )
                   )
                   .build();
               }
             } else {
-              output = CSL.TransactionOutputBuilder.new()
+              output = TransactionOutputBuilder.new()
                 .with_address(ReceiveAddress)
                 .next()
-                .with_coin(CSL.BigNum.from_str(lovelace.toString()))
+                .with_coin(BigNum.from_str(lovelace.toString()))
                 .build();
             }
 
@@ -547,14 +551,14 @@ export default {
             }
           });
 
-          const NativeScripts = CSL.NativeScripts.new();
+          const NativeScripts = NativeScripts.new();
 
           if (minting) {
             let assetsDict = {};
 
             MintingPolicies.forEach((scriptHash) => {
               NativeScripts.add(
-                CSL.NativeScript.from_bytes(this.fromHex(scriptHash))
+                NativeScript.from_bytes(this.fromHex(scriptHash))
               );
             });
 
@@ -575,18 +579,18 @@ export default {
                 let assetQty;
 
                 if (asset.quantity < 0) {
-                  assetQty = CSL.Int.new_negative(
-                    CSL.BigNum.from_str((asset.quantity * -1).toString())
+                  assetQty = Int.new_negative(
+                    BigNum.from_str((asset.quantity * -1).toString())
                   );
                 } else {
-                  assetQty = CSL.Int.new(
-                    CSL.BigNum.from_str(asset.quantity.toString())
+                  assetQty = Int.new(
+                    BigNum.from_str(asset.quantity.toString())
                   );
                 }
 
                 txBuilder.add_mint_asset(
-                  CSL.NativeScript.from_bytes(this.fromHex(asset.scriptHash)),
-                  CSL.AssetName.new(Buffer.from(name)),
+                  NativeScript.from_bytes(this.fromHex(asset.scriptHash)),
+                  AssetName.new(Buffer.from(name)),
                   assetQty
                 );
               } catch (e) {
@@ -604,7 +608,7 @@ export default {
           if (metadata) {
             Object.entries(metadata).map(([MetadataLabel, Metadata]) => {
               txBuilder.add_json_metadatum(
-                CSL.BigNum.from_str(MetadataLabel),
+                BigNum.from_str(MetadataLabel),
                 JSON.stringify(Metadata)
               );
             });
@@ -617,7 +621,7 @@ export default {
           try {
             txBuilder.add_inputs_from(
               inputs,
-              CSL.CoinSelectionStrategyCIP2.LargestFirstMultiAsset
+              CoinSelectionStrategyCIP2.LargestFirstMultiAsset
             );
             (await txBuilder).add_change_if_needed(changeAddress);
           } catch (e) {
@@ -634,19 +638,19 @@ export default {
           }
 
           if (dataHash) {
-            const auxDataHash = CSL.AuxiliaryDataHash.from_bytes(
+            const auxDataHash = AuxiliaryDataHash.from_bytes(
               this.fromHex(dataHash)
             );
             txBuilt.set_auxiliary_data_hash(auxDataHash);
           }
 
-          const witnessSet = CSL.TransactionWitnessSet.new();
+          const witnessSet = TransactionWitnessSet.new();
 
           if (minting) {
             witnessSet.set_native_scripts(NativeScripts);
           }
 
-          const tx = CSL.Transaction.new(txBuilt, witnessSet);
+          const tx = Transaction.new(txBuilt, witnessSet);
 
           return this.toHex(tx.to_bytes());
         },
@@ -657,17 +661,17 @@ export default {
         },
         async submitTransaction(tx, witnesses) {
           try {
-            // const witnesses = CSL.TransactionWitnessSet.from_bytes(this.fromHex(witnesses));
+            // const witnesses = TransactionWitnessSet.from_bytes(this.fromHex(witnesses));
 
-            const transaction = CSL.Transaction.from_bytes(this.fromHex(tx));
+            const transaction = Transaction.from_bytes(this.fromHex(tx));
             const txWitnesses = transaction.witness_set();
             const txVkeys = txWitnesses.vkeys();
             const txScripts = txWitnesses.native_scripts();
-            const totalVkeys = CSL.Vkeywitnesses.new();
-            const totalScripts = CSL.NativeScripts.new();
+            const totalVkeys = Vkeywitnesses.new();
+            const totalScripts = NativeScripts.new();
 
             for (let witness of witnesses) {
-              const addWitnesses = CSL.TransactionWitnessSet.from_bytes(
+              const addWitnesses = TransactionWitnessSet.from_bytes(
                 this.fromHex(witness)
               );
               const addVkeys = addWitnesses.vkeys();
@@ -690,11 +694,11 @@ export default {
               }
             }
 
-            const totalWitnesses = CSL.TransactionWitnessSet.new();
+            const totalWitnesses = TransactionWitnessSet.new();
             totalWitnesses.set_vkeys(totalVkeys);
             totalWitnesses.set_native_scripts(totalScripts);
 
-            const signedTx = await CSL.Transaction.new(
+            const signedTx = await Transaction.new(
               transaction.body(),
               totalWitnesses
             );
