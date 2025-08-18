@@ -2,7 +2,7 @@
   <v-app>
     <v-system-bar app>
       <v-spacer></v-spacer>
-      VeriGlyph: Nexus v0.0.1
+      VeriGlyph: Nexus v1.0.0
     </v-system-bar>
     <v-navigation-drawer app dark color="transparent">
       <v-list>
@@ -199,25 +199,29 @@
             ></TokenUpdateFields>
           </template>
           <v-row class="my-4">
-            <v-btn
-              color="accent"
-              @click="saveRegistration"
-              :disabled="!valid_registration"
-            >
-              <v-icon left>mdi-content-save</v-icon>
-              Save for Later
-            </v-btn>
-            <v-spacer></v-spacer>
-            <v-btn
-              color="primary"
-              @click="encodeRegistration"
-              :disabled="!valid_registration"
-              class="ms-2"
-              large
-            >
-              <v-icon left>mdi-lock</v-icon>
-              Publish Registration
-            </v-btn>
+            <v-col>
+              <v-btn
+                color="accent"
+                @click="saveRegistration"
+                :disabled="!valid_registration"
+              >
+                <v-icon left>mdi-content-save</v-icon>
+                Save for Later
+              </v-btn>
+            </v-col>
+            <v-col cols="auto"></v-col>
+            <v-col>
+              <v-btn
+                color="primary"
+                @click="encodeRegistration"
+                :disabled="!valid_registration"
+                class="ms-2"
+                large
+              >
+                <v-icon left>mdi-lock</v-icon>
+                Publish Registration
+              </v-btn>
+            </v-col>
           </v-row>
         </v-form>
         <pre>{{ registration.data }}</pre>

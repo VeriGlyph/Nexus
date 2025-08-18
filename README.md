@@ -5,14 +5,16 @@
 ![Vue.js](https://img.shields.io/badge/vuejs-%2335495e.svg?style=for-the-badge&logo=vuedotjs&logoColor=%234FC08D)
 ![Vuetify](https://img.shields.io/badge/Vuetify-1867C0?style=for-the-badge&logo=vuetify&logoColor=AEDDFF)
 ![Alpha](https://placehold.co/100x28/6404fb/ffffff?text=ALPHA&font=roboto)
-![Version: 0.0.1](https://placehold.co/100x28/170a40/ffffff?text=0.0.1&font=roboto)
+![Version: 1.0.0](https://placehold.co/100x28/170a40/ffffff?text=0.0.1&font=roboto)
 
-Your hub for creating, managing, and publishing CIP-88 Registration Certificates on the Cardano Blockchain.
+Your hub for creating, managing, and publishing CIP-88 Registration Certificates
+on the Cardano Blockchain.
 
 > TODO: Write better documentation...
 
-**NOTE: THIS SOFTWARE IS CURRENTLY IN AN EARLY POC (PROOF OF CONCEPT) ALPHA STAGE AND SHOULD NOT BE USED IN PRODUCTION.
-FOR TESTING AND ITERATING ON THE CARDANO PREPRODUCTION TESTNET ONLY AT THIS POINT.**
+**NOTE: THIS SOFTWARE IS CURRENTLY IN AN EARLY POC (PROOF OF CONCEPT) ALPHA
+STAGE AND SHOULD NOT BE USED IN PRODUCTION. FOR TESTING AND ITERATING ON THE
+CARDANO PREPRODUCTION TESTNET ONLY AT THIS POINT.**
 
 ## Installation (Docker)
 
@@ -21,7 +23,9 @@ FOR TESTING AND ITERATING ON THE CARDANO PREPRODUCTION TESTNET ONLY AT THIS POIN
 - Linux (tested on Ubuntu)
 - [Git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git)
 - [Make](https://askubuntu.com/questions/161104/how-do-i-install-make)
-- Docker ([Part-1](https://docs.docker.com/engine/install/ubuntu/) & [Part-2](https://docs.docker.com/engine/install/linux-postinstall/))
+-
+
+Docker ([Part-1](https://docs.docker.com/engine/install/ubuntu/) & [Part-2](https://docs.docker.com/engine/install/linux-postinstall/))
 
 ### Steps
 
@@ -56,10 +60,13 @@ _To run the make commands, simple type `make command-name` (e.g. `make up`)_
 > The app will be running on http://localhost:8080
 
 ### Compiles and minifies for production
+
 > npm run build
 
 ### Lints and fixes files
+
 > npm run lint
 
 ## Customize configuration
+
 See [Configuration Reference](https://cli.vuejs.org/config/).
