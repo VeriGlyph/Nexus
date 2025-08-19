@@ -2,7 +2,7 @@
   <v-app>
     <v-system-bar app>
       <v-spacer></v-spacer>
-      VeriGlyph: Nexus v0.0.1
+      VeriGlyph: Nexus v1.0.0
     </v-system-bar>
     <v-navigation-drawer app dark color="transparent">
       <v-list>
@@ -38,7 +38,7 @@
           </v-list-item-icon>
           <v-list-item-content>Export Registrations</v-list-item-content>
         </v-list-item>
-        <v-list-item>
+        <v-list-item @click="openImportDialog">
           <v-list-item-icon>
             <v-icon>mdi-import</v-icon>
           </v-list-item-icon>
@@ -67,23 +67,6 @@
             <v-list-item-content class="text-capitalize">
               {{ cardano.ActiveWallet.name.replace(" Wallet", "") }} Connected
             </v-list-item-content>
-          </v-list-item>
-          <v-list-item v-if="getting_balance">
-            <v-list-item-icon>
-              <v-progress-circular
-                width="4"
-                size="24"
-                color="secondary"
-                indeterminate
-              ></v-progress-circular>
-            </v-list-item-icon>
-            <v-list-item-content>Checking balance...</v-list-item-content>
-          </v-list-item>
-          <v-list-item v-else @click="getBalance">
-            <v-list-item-icon>
-              <v-icon>mdi-refresh</v-icon>
-            </v-list-item-icon>
-            <v-list-item-content>Refresh Balance</v-list-item-content>
           </v-list-item>
           <v-list-item @click="disconnect">
             <v-list-item-icon>
@@ -185,50 +168,60 @@
           <template v-if="registration.data[2].includes(25)">
             <TokenProjectFields
               :cip="25"
-              :value="registration.data[6][25][1]"
-              v-on:input="doUpdate"
+              v-model="registration.data[6][25][1]"
+              @input="doUpdate"
             ></TokenProjectFields>
           </template>
           <template v-if="registration.data[2].includes(68)">
             <TokenProjectFields
               :cip="68"
               v-model="registration.data[6][68][1]"
-              v-on:input="doUpdate"
+              @input="doUpdate"
             ></TokenProjectFields>
           </template>
           <template v-if="registration.data[2].includes(27)">
             <TokenRoyaltyFields
               v-model="registration.data[6][27][1]"
-              v-on:input="doUpdate"
+              @input="doUpdate"
             ></TokenRoyaltyFields>
           </template>
           <template v-if="registration.data[2].includes(26)">
             <FungibleTokenFields
               v-model="registration.data[6][26][1]"
               :policy_id="registration.data[1][1]"
-              v-on:input="doUpdate"
+              @input="doUpdate"
             ></FungibleTokenFields>
           </template>
+          <template v-if="registration.data[2].includes(86)">
+            <TokenUpdateFields
+              v-model="registration.data[6][86][1]"
+              @input="doUpdate"
+            ></TokenUpdateFields>
+          </template>
           <v-row class="my-4">
-            <v-btn
-              color="accent"
-              @click="saveRegistration"
-              :disabled="!valid_registration"
-            >
-              <v-icon left>mdi-content-save</v-icon>
-              Save for Later
-            </v-btn>
-            <v-spacer></v-spacer>
-            <v-btn
-              color="primary"
-              @click="encodeRegistration"
-              :disabled="!valid_registration"
-              class="ms-2"
-              large
-            >
-              <v-icon left>mdi-lock</v-icon>
-              Publish Registration
-            </v-btn>
+            <v-col>
+              <v-btn
+                color="accent"
+                @click="saveRegistration"
+                :disabled="!valid_registration"
+              >
+                <v-icon left>mdi-content-save</v-icon>
+                Save for Later
+              </v-btn>
+            </v-col>
+            <v-col cols="auto"></v-col>
+            <v-col>
+              <v-btn
+                color="primary"
+                @click="encodeRegistration"
+                :disabled="!valid_registration"
+                class="ms-2"
+                large
+              >
+                <v-icon left>mdi-lock</v-icon>
+                Publish Registration
+              </v-btn>
+            </v-col>
           </v-row>
         </v-form>
         <pre>{{ registration.data }}</pre>
@@ -479,8 +472,8 @@
             color="primary"
             @click="addSignature"
             :disabled="!newSignature.is_valid"
-            >Add</v-btn
-          >
+            >Add
+          </v-btn>
           <v-btn color="error" @click="modal.addSignature = false">
             Cancel
           </v-btn>
@@ -491,8 +484,8 @@
       <v-card>
         <v-card-text>
           <p class="text-center font-weight-bold text-h3 mb-0">
-            <v-icon color="error" size="96">mdi-alert-circle-outline</v-icon
-            ><br />
+            <v-icon color="error" size="96">mdi-alert-circle-outline</v-icon>
+            <br />
             ERROR
           </p>
         </v-card-text>
@@ -543,6 +536,12 @@
         </v-card-text>
       </v-card>
     </v-dialog>
+    <import-registrations-modal
+      ref="registrationDialog"
+      local-storage-key="VeriGlyphNexusRegistrations"
+      :max-size-m-b="10"
+      @loaded="onJsonLoaded"
+    />
   </v-app>
 </template>
 
@@ -575,10 +574,18 @@ import {
   TransactionWitnessSet,
   Vkeywitnesses,
 } from "@emurgo/cardano-serialization-lib-asmjs";
+import TokenUpdateFields from "@/components/TokenUpdateFields.vue";
+import ImportRegistrationsModal from "@/components/ImportRegistrationsModal.vue";
 
 export default {
   name: "App",
-  components: { FungibleTokenFields, TokenRoyaltyFields, TokenProjectFields },
+  components: {
+    ImportRegistrationsModal,
+    TokenUpdateFields,
+    FungibleTokenFields,
+    TokenRoyaltyFields,
+    TokenProjectFields,
+  },
   data: () => ({
     modal: {
       showSaved: false,
@@ -594,7 +601,7 @@ export default {
     registration_scopes: {
       0: "Policy ID",
     },
-    feature_sets: [25, 26, 27, 48, 60, 68, 86],
+    feature_sets: [25, 26, 27, 68, 86],
     validation_methods: {
       0: "Key Signature",
     },
@@ -629,6 +636,7 @@ export default {
       encoded_data: null,
       mapped_data: null,
     },
+    targetNetwork: process.env.VUE_APP_CARDANO_NETWORK || "preprod",
     network: null,
     utxo: null,
     getting_balance: false,
@@ -698,9 +706,13 @@ export default {
 
       try {
         this.network = await this.getWalletNetwork();
-        if (this.network === 0) {
-          // Is Testnet
+        let targetNetwork = 0;
+        if (this.targetNetwork === "mainnet") {
+          targetNetwork = 1;
         } else {
+          targetNetwork = 0;
+        }
+        if (this.network !== targetNetwork) {
           this.doError(
             `This app is currently only supported for testing on Preproduction Testnet. Please connect a wallet on that network!`
           );
@@ -805,7 +817,7 @@ export default {
           return;
         }
         if (sig[0] === pub_key) {
-          sig = new_sig_value;
+          // sig = new_sig_value;
           existing_signature_found = true;
         }
       });
@@ -895,14 +907,11 @@ export default {
       this.modal.showPolicy = false;
     },
     validSignature: function () {
-      if (
+      return !(
         this.registration.policy.id === null ||
         this.registration.policy.content === null ||
         this.signature.witnesses.length === 0
-      ) {
-        return false;
-      }
-      return true;
+      );
     },
     compilePayload: async function () {
       const payloadMap = new Map();
@@ -912,9 +921,6 @@ export default {
       const encoded_witnesses = witnesses.map((witness) => {
         return witness.map((s) => Buffer.from(s, "hex"));
       });
-      // witnesses.forEach((witness) => {
-      //   witness.map((s) => Buffer.from(s, "hex"));
-      // });
       payloadMap.set(2, encoded_witnesses);
 
       const cbor_encoded_payload = encode(payloadMap);
@@ -1128,6 +1134,12 @@ export default {
         JSON.stringify(this.saved_registrations)
       );
       this.loadSaved();
+    },
+    openImportDialog() {
+      this.$refs.registrationDialog.open();
+    },
+    onJsonLoaded({ data }) {
+      this.saved_registrations = data;
     },
   },
   created() {
