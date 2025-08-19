@@ -5,7 +5,7 @@
 ![Vue.js](https://img.shields.io/badge/vuejs-%2335495e.svg?style=for-the-badge&logo=vuedotjs&logoColor=%234FC08D)
 ![Vuetify](https://img.shields.io/badge/Vuetify-1867C0?style=for-the-badge&logo=vuetify&logoColor=AEDDFF)
 ![Alpha](https://placehold.co/100x28/6404fb/ffffff?text=ALPHA&font=roboto)
-![Version: 1.0.0](https://placehold.co/100x28/170a40/ffffff?text=0.0.1&font=roboto)
+![Version: 1.0.0](https://placehold.co/100x28/170a40/ffffff?text=1.0.0&font=roboto)
 
 Your hub for creating, managing, and publishing CIP-88 Registration Certificates
 on the Cardano Blockchain.

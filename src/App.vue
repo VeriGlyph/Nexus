@@ -210,7 +210,7 @@
               </v-btn>
             </v-col>
             <v-col cols="auto"></v-col>
-            <v-col>
+            <v-col class="text-end">
               <v-btn
                 color="primary"
                 @click="encodeRegistration"
@@ -224,7 +224,7 @@
             </v-col>
           </v-row>
         </v-form>
-        <pre>{{ registration.data }}</pre>
+        <!--        <pre>{{ registration.data }}</pre>-->
       </v-container>
     </v-main>
     <v-footer app class="text-center justify-center pt-0" dark color="#121212">
@@ -242,9 +242,9 @@
           <v-col>
             Released without warranty as open source under
             <a
-              href="https://creativecommons.org/licenses/by/4.0/"
+              href="https://github.com/VeriGlyph/Nexus/blob/main/LICENSE"
               target="_blank"
-              >CC-By-4.0 License</a
+              >Apache-2.0 License</a
             >
           </v-col>
           <v-spacer></v-spacer>
